@@ -1,0 +1,5 @@
+#ifndef ROG_ASTAR_CONFIG_HPP
+#define ROG_ASTAR_CONFIG_HPP
+
+
+#endif
