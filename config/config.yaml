@@ -1,0 +1,76 @@
+# ROG-Map Configuration File
+
+rog_map:
+  # ESDF (Euclidean Signed Distance Field) configuration
+  esdf:
+    enable: false                      # Enable ESDF computation
+    resolution: 0.2                    # ESDF resolution in meters
+    local_update_box: [10.0, 10.0, 5.0] # Local update box size [x, y, z] in meters
+
+  # PCD loading settings
+  load_pcd_en: false                   # Enable loading PCD file
+  pcd_name: "map.pcd"                  # PCD file path (can use ${CMAKE_ROOT_DIR}/path/to/file)
+
+  # Map sliding settings
+  map_sliding:
+    enable: true                       # Enable map sliding
+    threshold: 5.0                     # Threshold for map sliding
+
+  # Fixed map origin (initial position)
+  fix_map_origin: [0.0, 0.0, 0.0]      # Initial map origin [x, y, z]
+
+  # Frontier extraction for exploration
+  frontier_extraction_en: false        # Enable frontier extraction
+
+  # ROS callback configuration
+  ros_callback:
+    enable: true                       # Enable ROS callbacks
+    cloud_topic: "/cloud_registered"   # Point cloud topic
+    odom_topic: "/Odometry"            # Odometry topic
+    odom_timeout: 0.05                 # Odometry timeout in seconds
+
+  # Visualization settings
+  visualization:
+    enable: true                       # Enable visualization
+    use_dynamic_reconfigure: false     # Use dynamic reconfigure
+    pub_unknown_map_en: false          # Publish unknown map
+    frame_id: "world"                  # Frame ID for visualization
+    time_rate: 1.0                     # Time rate for visualization
+    frame_rate: 10                     # Frame rate for visualization
+    range: [50.0, 50.0, 10.0]          # Visualization range [x, y, z]
+
+  # Map resolution settings
+  resolution: 0.1                      # Map resolution in meters
+  inflation_resolution: 0.1            # Inflation resolution in meters (must be >= resolution)
+
+  # Unknown space inflation settings
+  unk_inflation_en: false              # Enable unknown space inflation
+  unk_inflation_step: 1                # Unknown inflation steps
+
+  # Occupancy inflation settings
+  inflation_step: 1                    # Inflation steps for obstacles
+  intensity_thresh: -1                 # Intensity threshold for filtering points
+
+  # Map size [x, y, z] in meters
+  map_size: [100.0, 100.0, 10.0]
+
+  # Point filtering
+  point_filt_num: 2                    # Number of points to filter
+
+  # Raycasting configuration
+  raycasting:
+    enable: true                       # Enable raycasting
+    batch_update_size: 1               # Batch update size
+    unk_thresh: 0.70                   # Unknown threshold
+    p_hit: 0.70                        # Probability of hit
+    p_miss: 0.70                       # Probability of miss
+    p_min: 0.12                        # Minimum probability
+    p_max: 0.97                        # Maximum probability
+    p_occ: 0.80                        # Occupancy threshold
+    p_free: 0.30                       # Free space threshold
+    ray_range: [0.3, 10.0]             # Raycasting range [min, max]
+    local_update_box: [20.0, 20.0, 5.0] # Local update box size [x, y, z]
+
+  # Virtual ground and ceiling height
+  virtual_ground_height: -0.1          # Virtual ground height
+  virtual_ceil_height: 2.5             # Virtual ceiling height
