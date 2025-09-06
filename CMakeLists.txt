@@ -64,11 +64,13 @@ include_directories(
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cpp include/*.h include/*.hpp include/*.cpp)
 
 add_library(rog_map STATIC ${srcs})
+add_executable(rogmapApp src/rog_map_ros/rogmapApp.cpp)
 
 target_include_directories(rog_map PUBLIC include)
 target_link_libraries(rog_map PUBLIC
         ${THIRD_PARTY})
 
+target_link_libraries(rogmapApp rog_map)
 
 ament_target_dependencies(${PROJECT_NAME} PUBLIC
         ${ros_libs}
@@ -83,6 +85,10 @@ install(TARGETS
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
+)
+install(TARGETS
+        rogmapApp
+        DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_export_libraries(${PROJECT_NAME}

@@ -323,6 +323,8 @@ namespace rog_map {
             br_map_ego_ = std::make_shared<tf2_ros::TransformBroadcaster>(nh_);
 
             init();
+            std::cout << "Odome Topic " << cfg_.odom_topic << std::endl;
+            std::cout << "Input Cloud Topic " << cfg_.odom_topic << std::endl;
             /// Initialize visualization module
             if (cfg_.visualization_en) {
                 vm_.occ_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/occ", qos);
