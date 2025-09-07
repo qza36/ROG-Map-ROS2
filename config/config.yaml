@@ -74,3 +74,21 @@ rog_map:
   # Virtual ground and ceiling height
   virtual_ground_height: -0.1          # Virtual ground height
   virtual_ceil_height: 2.5             # Virtual ceiling height
+  astar:
+     # Enable visualization of the planning process (e.g., expanded nodes)
+     visualize_process_en: true
+
+     # Allow diagonal movement in the grid search
+     allow_diag: true
+
+     # Heuristic function type: 0 for Diagonal, 1 for Manhattan, 2 for Euclidean
+     heu_type: 0
+
+     # The size of the local map used by A* in voxels [x, y, z]
+     map_voxel_num: [ 100, 100, 100 ]
+
+     # Example start position for the planner [x, y, z]
+     example_start: [ 0.0, 0.0, 1.0 ]
+
+     # Example goal position for the planner [x, y, z]
+     example_goal: [ 10.0, 5.0, 1.0 ]
