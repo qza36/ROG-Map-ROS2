@@ -15,7 +15,7 @@ cmake_policy(SET CMP0057 NEW)
 cmake_policy(SET CMP0054 NEW)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "Suppress developer warnings")
 
-add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\")
+add_definitions(-DROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
 
 # Define the voxelize and raycasting method
 add_definitions(-DORIGIN_AT_CORNER)
@@ -33,6 +33,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(PCL REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(includes
         include
@@ -78,6 +79,24 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC
         ${third_party_libs}
 )
+
+# --- Additions for rog_astar executable ---
+add_executable(rogastar App/rogmapApp/src/rog_astar.cpp)
+
+target_include_directories(rogastar PRIVATE App/rogmapApp/include)
+
+# Link against PCL and Eigen (found at the top level)
+target_link_libraries(rogastar PRIVATE
+    ${PCL_LIBRARIES}
+    Eigen3::Eigen
+        rog_map
+)
+
+install(TARGETS
+        rogastar
+        DESTINATION lib/${PROJECT_NAME}
+)
+# --- End of additions ---
 
 
 install(TARGETS

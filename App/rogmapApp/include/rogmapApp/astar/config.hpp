@@ -8,12 +8,12 @@
 #include <iostream>
 #include <vector>
 #include <exception>
+#include <string> // Add for std::string
 
-namespace rog_star
+namespace rog_astar
 {
     using std::string;
     using std::vector;
-    using Vec3f = Eigen::Vector3f;
     using Vec3i = Eigen::Vector3i;
     typedef pcl::PointXYZINormal PclPoint;
     typedef pcl::PointCloud<PclPoint> PointCloud;
@@ -30,44 +30,29 @@ namespace rog_star
             try
             {
                 // 声明参数
-                node_->declare_parameter<T>(param_name, default_value);
+                if (!node_->has_parameter(param_name)) {
+                    node_->declare_parameter<T>(param_name, default_value);
+                }
 
                 // 获取参数值
-                param_value = node_->get_parameter(param_name).as_<T>();
-
+                param_value = node_->get_parameter(param_name).get_value<T>();
                 printf("\033[0;32m Load param %s success: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str());
+                       (std::string(node_->get_fully_qualified_name()) + "/" + param_name).c_str());
                 std::cout << param_value << std::endl;
                 return true;
-            }
-            catch (const rclcpp::exceptions::ParameterNotDeclaredException& e)
-            {
-                // 参数未声明的情况
-                printf("\033[0;33m Load param %s failed, use default value: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str());
-                param_value = default_value;
-                std::cout << param_value << std::endl;
-
-                if (required) {
-                    throw std::invalid_argument(
-                        std::string("Required param " + node_->get_fully_qualified_name() +
-                                   "/" + param_name + " not found"));
-                }
-                return false;
             }
             catch (const std::exception& e)
             {
                 // 其他异常情况
                 printf("\033[0;33m Load param %s failed with error: %s, use default value: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str(),
+                       (std::string(node_->get_fully_qualified_name()) + "/" + param_name).c_str(),
                        e.what());
                 param_value = default_value;
                 std::cout << param_value << std::endl;
-
                 if (required) {
                     throw std::invalid_argument(
-                        std::string("Required param " + node_->get_fully_qualified_name() +
-                                   "/" + param_name + " not found"));
+                        std::string("Required param ") + node_->get_fully_qualified_name() +
+                                   "/" + param_name + " not found");
                 }
                 return false;
             }
@@ -81,53 +66,35 @@ namespace rog_star
             try
             {
                 // 声明参数（如果不存在则创建，如果存在则获取）
-                node_->declare_parameter<std::vector<T>>(param_name, default_value);
+                if (!node_->has_parameter(param_name)) {
+                    node_->declare_parameter<std::vector<T>>(param_name, default_value);
+                }
 
                 // 获取参数值 - 使用正确的方法
-                param_value = node_->get_parameter(param_name).as_<std::vector<T>>();
-
+                param_value = node_->get_parameter(param_name).get_value<std::vector<T>>();
                 printf("\033[0;32m Load param %s success: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str());
+                       (std::string(node_->get_fully_qualified_name()) + "/" + param_name).c_str());
                 for (const auto& val : param_value) {
                     std::cout << val << " ";
                 }
                 std::cout << std::endl;
                 return true;
             }
-            catch (const rclcpp::exceptions::ParameterNotDeclaredException& e)
-            {
-                // 参数未声明的情况
-                printf("\033[0;33m Load param %s failed, use default value: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str());
-                param_value = default_value;
-                for (const auto& val : param_value) {
-                    std::cout << val << " ";
-                }
-                std::cout << std::endl;
-
-                if (required) {
-                    throw std::invalid_argument(
-                        std::string("Required param " + node_->get_fully_qualified_name() +
-                                   "/" + param_name + " not found"));
-                }
-                return false;
-            }
             catch (const std::exception& e)
             {
                 // 其他异常情况
                 printf("\033[0;33m Load param %s failed with error: %s, use default value: \033[0;0m",
-                       (node_->get_fully_qualified_name() + "/" + param_name).c_str(),
+                       (std::string(node_->get_fully_qualified_name()) + "/" + param_name).c_str(),
                        e.what());
                 param_value = default_value;
                 for (const auto& val : param_value) {
                     std::cout << val << " ";
                 }
                 std::cout << std::endl;
-
                 if (required) {
                     throw std::invalid_argument(
-                        std::string("Required param " + node_->get_fully_qualified_name() +
-                                   "/" + param_name + " not found"));
+                        std::string("Required param ") + node_->get_fully_qualified_name() +
+                                   "/" + param_name + " not found");
                 }
                 return false;
             }
@@ -139,8 +106,8 @@ namespace rog_star
         Vec3i map_voxel_num, map_size_i;
         int heu_type;
 
-        Vec3f example_start;
-        Vec3f example_goal;
+        Eigen::Vector3d example_start;
+        Eigen::Vector3d example_goal;
 
         explicit Config(const rclcpp::Node::SharedPtr& node) : node_(node)
         {
@@ -151,9 +118,8 @@ namespace rog_star
             // 加载整数参数
             LoadParam("astar/heu_type", heu_type, 0);
 
-            // 加载地图体素数量
-            vector<int> vox;
-            LoadParam("astar/map_voxel_num", vox, vector<int>{100, 100, 100});
+            vector<long> vox;
+            LoadParam("astar/map_voxel_num", vox, vector<long>{100, 100, 100});
             if(vox.size() == 3) {
                 map_voxel_num = Vec3i(vox[0], vox[1], vox[2]);
             } else {
@@ -166,22 +132,22 @@ namespace rog_star
             vector<double> tmp;
             LoadParam("astar/example_start", tmp, vector<double>{0.0, 0.0, 0.0});
             if(tmp.size() == 3) {
-                example_start = Vec3f(tmp[0], tmp[1], tmp[2]);
+                example_start = Eigen::Vector3d(tmp[0], tmp[1], tmp[2]);
             } else {
                 RCLCPP_WARN(node_->get_logger(),
                            "example_start should have 3 elements, using default [0,0,0]");
-                example_start = Vec3f(0.0, 0.0, 0.0);
+                example_start = Eigen::Vector3d(0.0, 0.0, 0.0);
             }
 
             // 加载终点坐标
             tmp.clear();
             LoadParam("astar/example_goal", tmp, vector<double>{10.0, 10.0, 10.0});
             if(tmp.size() == 3) {
-                example_goal = Vec3f(tmp[0], tmp[1], tmp[2]);
+                example_goal = Eigen::Vector3d(tmp[0], tmp[1], tmp[2]);
             } else {
                 RCLCPP_WARN(node_->get_logger(),
                            "example_goal should have 3 elements, using default [10,10,10]");
-                example_goal = Vec3f(10.0, 10.0, 10.0);
+                example_goal = Eigen::Vector3d(10.0, 10.0, 10.0);
             }
 
             // 确保地图体素数为奇数（可能是为了中心对称）
