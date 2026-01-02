@@ -1,0 +1,63 @@
+# ROG-Map Realtime Configuration (for LIO)
+
+rog_map:
+  # ESDF configuration
+  esdf:
+    enable: false
+    resolution: 0.2
+    local_update_box: [10.0, 10.0, 5.0]
+
+  # Disable PCD loading for realtime
+  load_pcd_en: false
+
+  # Map sliding settings
+  map_sliding:
+    enable: true
+    threshold: 5.0
+
+  fix_map_origin: [0.0, 0.0, 0.0]
+  frontier_extraction_en: false
+
+  # ROS callback - modify these to match your LIO output
+  ros_callback:
+    enable: true
+    cloud_topic: "/cloud_registered"    # FAST-LIO2 default
+    odom_topic: "/Odometry"             # FAST-LIO2 default
+    odom_timeout: 0.1
+
+  # Visualization
+  visualization:
+    enable: true
+    use_dynamic_reconfigure: false
+    pub_unknown_map_en: false
+    frame_id: "world"
+    time_rate: 10.0                     # Higher rate for realtime
+    frame_rate: 10
+    range: [30.0, 30.0, 5.0]            # Smaller range for faster viz
+
+  # Map settings
+  resolution: 0.1
+  inflation_resolution: 0.1
+  unk_inflation_en: false
+  unk_inflation_step: 1
+  inflation_step: 2                     # 2 steps = 0.2m inflation
+  intensity_thresh: -1
+  map_size: [100.0, 100.0, 10.0]
+  point_filt_num: 2
+
+  # Raycasting
+  raycasting:
+    enable: true
+    batch_update_size: 1
+    unk_thresh: 0.70
+    p_hit: 0.70
+    p_miss: 0.70
+    p_min: 0.12
+    p_max: 0.97
+    p_occ: 0.80
+    p_free: 0.30
+    ray_range: [0.5, 15.0]              # Adjust based on your LiDAR range
+    local_update_box: [20.0, 20.0, 5.0]
+
+  virtual_ground_height: -0.3
+  virtual_ceil_height: 3.0

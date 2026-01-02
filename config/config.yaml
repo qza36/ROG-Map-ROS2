@@ -8,8 +8,8 @@ rog_map:
     local_update_box: [10.0, 10.0, 5.0] # Local update box size [x, y, z] in meters
 
   # PCD loading settings
-  load_pcd_en: false                   # Enable loading PCD file
-  pcd_name: "map.pcd"                  # PCD file path (can use ${CMAKE_ROOT_DIR}/path/to/file)
+  load_pcd_en: true                    # Enable loading PCD file
+  pcd_name: "${CMAKE_ROOT_DIR}/config/rmuc_2024.pcd"  # PCD file path
 
   # Map sliding settings
   map_sliding:

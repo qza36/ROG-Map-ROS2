@@ -312,11 +312,10 @@ namespace rog_map {
         typedef shared_ptr<ROGMapROS> Ptr;
 
         ROGMapROS(const rclcpp::Node::SharedPtr nh, const std::string& cfg_path): nh_(nh) {
-            // TODO: The current implementation uses a lenient QoS configuration for message transmission.
-            const rclcpp::QoS qos(rclcpp::QoS(1)
-                                  .best_effort()
-                                  .keep_last(1)
-                                  .durability_volatile());
+            // QoS for publishers (reliable for rviz2 compatibility)
+            const rclcpp::QoS pub_qos(rclcpp::QoS(10).reliable());
+            // QoS for subscribers (best effort for sensor data)
+            const rclcpp::QoS sub_qos(rclcpp::QoS(1).best_effort().keep_last(1).durability_volatile());
 
             cfg_ = rog_map::Config(cfg_path);
             // 创建 TransformBroadcaster
@@ -327,19 +326,19 @@ namespace rog_map {
             std::cout << YELLOW << "Input Cloud Topic " << cfg_.cloud_topic << std::endl;
             /// Initialize visualization module
             if (cfg_.visualization_en) {
-                vm_.occ_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/occ", qos);
-                vm_.unknown_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/unk", qos);
-                vm_.occ_inf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/inf_occ", qos);
-                vm_.unknown_inf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/inf_unk", qos);
+                vm_.occ_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/occ", pub_qos);
+                vm_.unknown_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/unk", pub_qos);
+                vm_.occ_inf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/inf_occ", pub_qos);
+                vm_.unknown_inf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/inf_unk", pub_qos);
 
                 if (cfg_.frontier_extraction_en) {
-                    vm_.frontier_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/frontier", qos);
+                    vm_.frontier_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/frontier", pub_qos);
                 }
 
                 if (cfg_.esdf_en) {
-                    vm_.esdf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf", qos);
-                    // vm_.esdf_neg_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf/neg", qos);
-                    // vm_.esdf_occ_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf/occ", qos);
+                    vm_.esdf_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf", pub_qos);
+                    // vm_.esdf_neg_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf/neg", pub_qos);
+                    // vm_.esdf_occ_pub = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("rog_map/esdf/occ", pub_qos);
                 }
 
                 if (cfg_.viz_time_rate > 0) {
@@ -353,7 +352,7 @@ namespace rog_map {
                 }
             }
 
-            vm_.mkr_arr_pub = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("rog_map/map_bound", qos);
+            vm_.mkr_arr_pub = nh_->create_publisher<visualization_msgs::msg::MarkerArray>("rog_map/map_bound", pub_qos);
 
             if (cfg_.ros_callback_en) {
                 rc_.odom_me_cbk_group = nh_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -361,10 +360,10 @@ namespace rog_map {
                 rclcpp::SubscriptionOptions so;
                 so.callback_group = rc_.odom_me_cbk_group;
                 rc_.odom_sub = nh_->create_subscription<nav_msgs::msg::Odometry>(
-                    cfg_.odom_topic, qos, std::bind(&ROGMapROS::odomCallback, this, std::placeholders::_1), so);
+                    cfg_.odom_topic, sub_qos, std::bind(&ROGMapROS::odomCallback, this, std::placeholders::_1), so);
                 so.callback_group = rc_.cloud_me_cbk_group;
                 rc_.cloud_sub = nh_->create_subscription<sensor_msgs::msg::PointCloud2>(
-                    cfg_.cloud_topic, qos, std::bind(&ROGMapROS::cloudCallback, this, std::placeholders::_1), so);
+                    cfg_.cloud_topic, sub_qos, std::bind(&ROGMapROS::cloudCallback, this, std::placeholders::_1), so);
                 rc_.update_cbk_group = nh_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
                 rc_.update_timer = nh_->create_wall_timer(
                     std::chrono::milliseconds(1), // 0.001秒，即1毫秒
