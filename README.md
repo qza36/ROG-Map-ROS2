@@ -18,6 +18,49 @@
     <a href="https://youtu.be/eDkwGXCea7w?si=IKCW5O0otU0bObbC"><img alt="Youtube" src="./misc/Video-Youtube-red.svg"/></a>
 </div>
 
+## ROS2 Fork
+
+This is a ROS2 port of [ROG-Map](https://github.com/hku-mars/ROG-Map), adapted from the ROS2 implementation in [SUPER](https://github.com/hku-mars/SUPER).
+
+## Build Instructions (ROS2)
+
+**Dependencies**
+```bash
+sudo apt-get install libeigen3-dev libyaml-cpp-dev libpcl-dev
+```
+
+**Build**
+```bash
+mkdir -p ros2_ws/src && cd ros2_ws/src
+git clone https://github.com/qza36/ROG-Map-ROS2.git rog_map
+cd ..
+colcon build --packages-select rog_map
+source install/setup.bash
+```
+
+**Run**
+```bash
+# Using launch file
+ros2 launch rog_map rog_map.launch.py
+
+# Or run directly with custom config
+ros2 run rog_map rogmapApp --ros-args -p config_name:=realtime.yaml
+```
+
+**Configuration**
+
+Two config files are provided in `config/`:
+- `config.yaml` - Default config with PCD loading for testing
+- `realtime.yaml` - Realtime config for LIO integration
+
+Modify `ros_callback` section to match your LIO output topics:
+```yaml
+ros_callback:
+  enable: true
+  cloud_topic: "/cloud_registered"  # Your point cloud topic
+  odom_topic: "/Odometry"           # Your odometry topic
+```
+
 ## Updates
 
 * **January 29, 2025** - The ROS2 version of ROG-Map is now available in [SUPER ](https://github.com/hku-mars/SUPER)🛸, our open-source MAV navigation system recently accepted by *Science Robotics*. Check it out!
@@ -41,51 +84,6 @@ If our repository supports your academic projects, please cite our paper. Thank 
 Click for the video demo.
 
 [![Video Demo](./misc/out.png)](https://www.youtube.com/watch?v=eDkwGXCea7w)
-
-## Build Instructions
-
-```bash
-# install dependencies
-sudo apt-get install ros-noetic-rosfmt
-# for MARSIM example
-sudo apt-get install libglfw3-dev libglew-dev
-# Eigen [version testd: 3.3.7-2] and soft link 
-sudo apt-get install libeigen3-dev       
-sudo ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
-# dw for backward cpp
-sudo apt-get install libdw-dev
-
-mkdir -p rog_ws/src && cd rog_ws/src
-git clone https://github.com/hku-mars/ROG-Map.git
-cd ..
-catkin_make -DBUILD_TYPE=Release
-```
-
-**Report issue**
-
-When encountering build issues, please include the output from the version check script [./scripts/check_version.sh](./scripts/check_version.sh) when submitting your issue.
-
-```bash
-cd rog_map/scripts
-bash check_version.sh
-```
-
-Example:
-
-```
-=== GCC Version ===
-gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
-=== G++ Version ===
-g++ (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
-=== Eigen Version ===
-Version: 3.3.7-2
-```
-
-**Known Build Issues**
-
-- Disable the conda environment with `conda deactivate` to avoid linking issues. If you have try `catkin_make` in conda environment, please delete the `build` and `devel` and deactivate conda, and try `catkin_make` again.
-- If VizCfg fails to generate, try building with `catkin_make -DCATKIN_DEVEL_PREFIX:PATH=${change-to-your-path-to-rog_ws}/devel`.
-- Eigen version problem [#7](https://github.com/hku-mars/ROG-Map/issues/7), tested Eigen version: `3.3.7-2`,`3.4.1`.
 
 ## Overview
 
